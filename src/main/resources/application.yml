@@ -1,0 +1,104 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /
+  tomcat:
+    max-threads: 200
+    connection-timeout: 30s
+
+spring:
+  application:
+    name: digital-twin-ai
+  profiles:
+    active: dev
+  
+  # Redis配置 (Redis configuration)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: 0
+      timeout: 10s
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # 数据库配置 (Database configuration)
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/digital_twin?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # HikariCP连接池配置 (HikariCP connection pool configuration)
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  
+  # JPA配置 (JPA configuration)
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+# 日志配置 (Logging configuration)
+logging:
+  level:
+    root: INFO
+    com.foxx: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: WARN
+  file:
+    name: logs/digital-twin-ai.log
+    max-size: 10MB
+    max-history: 10
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# WebSocket配置 (WebSocket configuration)
+websocket:
+  endpoint: /ws
+  allowed-origins: "*"
+  
+# Dify API配置
+dify:
+  api:
+    base-url: ${DIFY_API_URL:http://localhost:80}
+    version: v1
+    chat-endpoint: /chat-messages
+    api-key: ${DIFY_API_KEY:xxxxxx}
+    service-name: digital-twin
+    hmac:
+      enabled: false
+      secret-key: ${DIFY_HMAC_KEY:dify-hmac-secret-default-value}
+    connect-timeout: 80000
+    read-timeout: 120000
+    fallback:
+      enabled: true
+      auto-retry-on-failure: true
+  
+# 浏览器服务配置 (Browser service configuration)
+browser-service:
+  url: http://localhost:9000
+  connection-timeout: 10000
+  read-timeout: 30000
+
+# SpringDoc OpenAPI配置 (SpringDoc OpenAPI configuration)
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  packages-to-scan: com.foxx.digitaltwinai.controller
